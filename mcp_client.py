@@ -5,9 +5,15 @@ from contextlib import AsyncExitStack
 from unittest import result
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
-
 import json
 from pydantic import AnyUrl
+#sampling imports
+from mcp.types import (
+    CreateMessageRequestParams,
+    CreateMessageResult,
+    TextContent
+)
+from mcp.shared.context import RequestContext
 
 class MCPClient:
     def __init__(
@@ -15,10 +21,12 @@ class MCPClient:
         command: str,
         args: list[str],
         env: Optional[dict] = None,
+        llm_service: Any = None,
     ):
         self._command = command
         self._args = args
         self._env = env
+        self._llm_service = llm_service  #accepting the llm service as a parameter for sampling
         self._session: Optional[ClientSession] = None
         self._exit_stack: AsyncExitStack = AsyncExitStack()
 
@@ -33,7 +41,9 @@ class MCPClient:
         )
         _stdio, _write = stdio_transport
         self._session = await self._exit_stack.enter_async_context(
-            ClientSession(_stdio, _write)
+            ClientSession(_stdio, _write,
+                          #passing the callback when initializing the client session
+                          sampling_callback=self._sampling_callback )
         )
         await self._session.initialize()
 
@@ -87,6 +97,31 @@ class MCPClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.cleanup()
 
+    #Sampling method
+    async def _sampling_callback(
+        self,  # ← was missing
+        context: RequestContext,
+        params: CreateMessageRequestParams
+    ) -> CreateMessageResult:
+        
+        messages = [
+            {"role": msg.role, "content": msg.content.text}
+            for msg in params.messages
+        ]
+        
+        result = self._llm_service.chat(
+        messages=messages,
+        system=params.systemPrompt 
+        )
+        print(f"sampling response: {self._llm_service.text_from_message(result)}")
+        return CreateMessageResult(
+            role="assistant",
+            model=self._llm_service.model,
+            content=TextContent(
+                type="text",
+                text=self._llm_service.text_from_message(result)
+            ),
+        )
 
 # For testing
 async def main():

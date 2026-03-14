@@ -1,10 +1,8 @@
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 from pydantic import Field
 
 import mcp.server.fastmcp.prompts.base as base
 mcp = FastMCP("DocumentMCP", log_level="ERROR")
-
-
 docs = {
     "deposition.md": "This deposition covers the testimony of Angela Smith, P.E.",
     "report.pdf": "The report details the state of a 20m condenser tower.",
@@ -12,8 +10,22 @@ docs = {
     "outlook.pdf": "This document presents the projected future performance of the system.",
     "plan.md": "The plan outlines the steps for the project's implementation.",
     "spec.txt": "These specifications define the technical requirements for the equipment.",
+    "research.txt": """
+    The condenser tower project began in January 2023 with an initial budget of $2.4 million.
+    The engineering team, led by Angela Smith P.E., conducted a full structural assessment over 
+    a period of 6 months. The assessment revealed significant corrosion on levels 3 through 7,
+    particularly around the cooling fins and water distribution system. Temperature readings 
+    showed inconsistencies of up to 15 degrees Celsius between the north and south faces.
+    Water flow rates were measured at 340 liters per minute, below the required 400 liters per minute.
+    The financial impact of delayed maintenance was estimated at $180,000 per month in lost efficiency.
+    Recommended repairs include full replacement of cooling fins on levels 3-5, recalibration of 
+    the water distribution valves, and installation of new temperature monitoring sensors on all 8 levels.
+    Total repair cost is estimated at $890,000 with a projected completion date of March 2024.
+    Upon completion, the tower is expected to return to 98% operational efficiency.
+    """,
 }
-
+#sampling imports
+from mcp.types import SamplingMessage, TextContent
 # TODO: Write a tool to read a doc
 @mcp.tool(
     name="read_doc_contents",
@@ -116,6 +128,45 @@ Present the summary directly to the user without modifying the original document
     return [
         base.UserMessage(prompt)
     ]
+#Sampling
+@mcp.tool(
+    name="summarize_with_sampling",
+    description="Summarizes a document by delegating to the client's LLM using sampling."
+)
+async def summarize_with_sampling(
+    doc_id: str = Field(description="Id of the document to summarize"),
+    ctx: Context = None
+):
+    if doc_id not in docs:
+        raise ValueError(f"Doc with id {doc_id} not found")
+    
+    text_to_summarize = docs[doc_id]
+    
+    prompt = f"""
+    Please summarize the following text in NO MORE THAN 3 lines.
+    Start your response with: "Here is a summary using the sampling method:"
 
+    Text to summarize:
+    {text_to_summarize}
+        """
+    
+    result = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role="user",
+                content=TextContent(
+                    type="text",
+                    text=prompt
+                )
+            )
+        ],
+        max_tokens=4000,
+        system_prompt="You are a helpful research assistant",
+    )
+    
+    if result.content.type == "text":
+        return result.content.text
+    else:
+        raise ValueError("Sampling failed")
 if __name__ == "__main__":
     mcp.run(transport="stdio")
