@@ -1,111 +1,91 @@
-# MCP Chat
+# MCP Chat — Advanced Topics
 
-MCP Chat is a command-line interface application that enables interactive chat capabilities with AI models through the Anthropic API. The application supports document retrieval, command-based prompts, and extensible tool integrations via the MCP (Model Control Protocol) architecture.
+This project extends the [MCP Chat introduction project](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration) by applying the advanced concepts from Anthropic Academy's **Model Context Protocol: Advanced Topics** course directly into a working CLI application.
 
-## Prerequisites
+---
 
+## Requirements
+
+- Completion of the [MCP Chat intro project](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration)
 - Python 3.9+
-- Anthropic API Key
+- Gemini API Key → [Get one here](https://aistudio.google.com/)
+
+---
 
 ## Setup
 
-### Step 1: Configure the environment variables
-
-1. Create or edit the `.env` file in the project root and verify that the following variables are set correctly:
-
-```
-ANTHROPIC_API_KEY=""  # Enter your Anthropic API secret key
-```
-
-### Step 2: Install dependencies
-
-#### Option 1: Setup with uv (Recommended)
-
-[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
-
-1. Install uv, if not already installed:
-
+1. Clone the repo and switch to the advanced branch:
 ```bash
-pip install uv
+git clone https://github.com/sirinebenyedder/anthropic-mcp-advanced-gemini-version
+git checkout feat/advanced-mcp
 ```
 
-2. Create and activate a virtual environment:
+2. Fill in your keys:
+```bash
+cp .env
+```
 
+3. Install dependencies and run:
 ```bash
 uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-3. Install dependencies:
-
-```bash
 uv pip install -e .
-```
-
-4. Run the project
-
-```bash
 uv run main.py
 ```
 
-#### Option 2: Setup without uv
+> See the [intro project README](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration) for full setup details.
 
-1. Create and activate a virtual environment:
+---
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
+## Course Plan
 
-2. Install dependencies:
+### 1. Sampling
 
-```bash
-pip install anthropic python-dotenv prompt-toolkit "mcp[cli]==1.8.0"
-```
+#### 1.1 Definition
 
-3. Run the project
-
-```bash
-python main.py
-```
-
-## Usage
-
-### Basic Interaction
-
-Simply type your message and press Enter to chat with the model.
-
-### Document Retrieval
-
-Use the @ symbol followed by a document ID to include document content in your query:
+Sampling is an MCP feature that allows the **server to delegate LLM calls back to the client**. Instead of the server running its own AI model, the server sends a request to the client saying *"please process this text with your LLM"* — and the client responds using its own already-configured model.
 
 ```
-> Tell me about @deposition.md
+Without Sampling:
+Server tools → return raw data → client LLM processes it
+
+With Sampling:
+Server tools → ask client "summarize this for me"
+             → client's Gemini processes it
+             → result returned to server → back to user
 ```
 
-### Commands
+### 1.2 CLI Example: Document Summarization
 
-Use the / prefix to execute commands defined in the MCP server:
-
+#### 1. Input (`research.txt`)
+```text
+The condenser tower project began in January 2023 with an initial budget of $2.4 million.
+    The engineering team, led by Angela Smith P.E., conducted a full structural assessment over 
+    a period of 6 months. The assessment revealed significant corrosion on levels 3 through 7,
+    particularly around the cooling fins and water distribution system. Temperature readings 
+    showed inconsistencies of up to 15 degrees Celsius between the north and south faces.
+    Water flow rates were measured at 340 liters per minute, below the required 400 liters per minute.
+    The financial impact of delayed maintenance was estimated at $180,000 per month in lost efficiency.
+    Recommended repairs include full replacement of cooling fins on levels 3-5, recalibration of 
+    the water distribution valves, and installation of new temperature monitoring sensors on all 8 levels.
+    Total repair cost is estimated at $890,000 with a projected completion date of March 2024.
+    Upon completion, the tower is expected to return to 98% operational efficiency.
 ```
-> /summarize deposition.md
-```
+#### 2. Output
 
-Commands will auto-complete when you press Tab.
+---
 
-## Development
+### 2. Log and Progress Notifications
 
-### Adding New Documents
+> 🚧 Coming soon
 
-Edit the `mcp_server.py` file to add new documents to the `docs` dictionary.
+---
 
-### Implementing MCP Features
+### 3. Roots
 
-To fully implement the MCP features:
+> 🚧 Coming soon
 
-1. Complete the TODOs in `mcp_server.py`
-2. Implement the missing functionality in `mcp_client.py`
+---
 
-### Linting and Typing Check
+### 4. Transports and Communication
 
-There are no lint or type checks implemented.
+> 🚧 Coming soon
