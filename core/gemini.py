@@ -196,6 +196,12 @@ class Gemini:
         content_blocks = []
         stop_reason = "end_turn"
 
+        #Handle cases where the model blocks the response or returns an empty candidate
+        if (not response.candidates or 
+    not response.candidates[0].content or
+    not response.candidates[0].content.parts):
+            return GeminiMessage(content=[TextBlock(text="Response blocked or empty.")])
+
         for part in response.candidates[0].content.parts:
             if part.function_call:
                 stop_reason = "tool_use"
@@ -209,5 +215,6 @@ class Gemini:
                 )
             elif part.text:
                 content_blocks.append(TextBlock(text=part.text))
+        # -----------------------
 
         return GeminiMessage(content=content_blocks, stop_reason=stop_reason)

@@ -61,7 +61,9 @@ class MCPClient:
     async def call_tool(
         self, tool_name: str, tool_input: dict
     ) -> types.CallToolResult | None:
-        return await self.session().call_tool(tool_name, tool_input)
+        return await self.session().call_tool(tool_name, tool_input,
+                                              #For the Logging and Notification
+                                              progress_callback=self._progress_callback,)
     
 
     async def list_prompts(self) -> list[types.Prompt]:
@@ -122,6 +124,13 @@ class MCPClient:
                 text=self._llm_service.text_from_message(result)
             ),
         )
+
+    #Logging and Notification callback
+    async def _progress_callback(self, progress, total, message):
+        if total:
+            print(f"⏳ {progress}/{total} ({(progress/total)*100:.1f}%)")
+        else:
+            print(f"⏳ {progress}")
 
 # For testing
 async def main():

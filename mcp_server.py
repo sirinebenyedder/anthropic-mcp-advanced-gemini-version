@@ -134,14 +134,20 @@ Present the summary directly to the user without modifying the original document
     description="Summarizes a document by delegating to the client's LLM using sampling."
 )
 async def summarize_with_sampling(
+
     doc_id: str = Field(description="Id of the document to summarize"),
-    ctx: Context = None
+    ctx: Context = None  # ctx handles sampling, logging and progress notifications
 ):
     if doc_id not in docs:
         raise ValueError(f"Doc with id {doc_id} not found")
     
+    await ctx.info("Reading document...")
+    await ctx.report_progress(25, 100)
     text_to_summarize = docs[doc_id]
     
+    await ctx.info("Sending to client LLM via sampling...")  # logging
+    await ctx.report_progress(50, 100)  # progress
+
     prompt = f"""
     Please summarize the following text in NO MORE THAN 3 lines.
     Start your response with: "Here is a summary using the sampling method:"
@@ -150,7 +156,7 @@ async def summarize_with_sampling(
     {text_to_summarize}
         """
     
-    result = await ctx.session.create_message(
+    result = await ctx.session.create_message(  # sampling
         messages=[
             SamplingMessage(
                 role="user",
@@ -164,6 +170,9 @@ async def summarize_with_sampling(
         system_prompt="You are a helpful research assistant",
     )
     
+    await ctx.info("Summary complete!")
+    await ctx.report_progress(100, 100)
+
     if result.content.type == "text":
         return result.content.text
     else:
