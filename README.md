@@ -54,9 +54,23 @@ Server tools → ask client "summarize this for me"
              → result returned to server → back to user
 ```
 
-#### 1.2 CLI Example
+### 1.2 CLI Example: Document Summarization
 
-The `summarize_with_sampling` tool was added to `mcp_server.py`. 
+#### 1. Input (`research.txt`)
+```text
+The condenser tower project began in January 2023 with an initial budget of $2.4 million.
+    The engineering team, led by Angela Smith P.E., conducted a full structural assessment over 
+    a period of 6 months. The assessment revealed significant corrosion on levels 3 through 7,
+    particularly around the cooling fins and water distribution system. Temperature readings 
+    showed inconsistencies of up to 15 degrees Celsius between the north and south faces.
+    Water flow rates were measured at 340 liters per minute, below the required 400 liters per minute.
+    The financial impact of delayed maintenance was estimated at $180,000 per month in lost efficiency.
+    Recommended repairs include full replacement of cooling fins on levels 3-5, recalibration of 
+    the water distribution valves, and installation of new temperature monitoring sensors on all 8 levels.
+    Total repair cost is estimated at $890,000 with a projected completion date of March 2024.
+    Upon completion, the tower is expected to return to 98% operational efficiency.
+```
+#### 2. Output
 
 ---
 
