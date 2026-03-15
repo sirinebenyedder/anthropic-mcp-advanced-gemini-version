@@ -1,111 +1,77 @@
-# MCP Chat
+# MCP Chat — Advanced Topics
 
-MCP Chat is a command-line interface application that enables interactive chat capabilities with AI models through the Anthropic API. The application supports document retrieval, command-based prompts, and extensible tool integrations via the MCP (Model Control Protocol) architecture.
+This project extends the [MCP Chat introduction project](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration) by applying the advanced concepts from Anthropic Academy's **Model Context Protocol: Advanced Topics** course directly into a working CLI application.
 
-## Prerequisites
+---
 
+## Requirements
+
+- Completion of the [MCP Chat intro project](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration)
 - Python 3.9+
-- Anthropic API Key
+- Gemini API Key → [Get one here](https://aistudio.google.com/)
+
+---
 
 ## Setup
 
-### Step 1: Configure the environment variables
-
-1. Create or edit the `.env` file in the project root and verify that the following variables are set correctly:
-
-```
-ANTHROPIC_API_KEY=""  # Enter your Anthropic API secret key
-```
-
-### Step 2: Install dependencies
-
-#### Option 1: Setup with uv (Recommended)
-
-[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
-
-1. Install uv, if not already installed:
-
+1. Clone the repo and switch to the advanced branch:
 ```bash
-pip install uv
+git clone https://github.com/sirinebenyedder/anthropic-mcp-advanced-gemini-version
+git checkout feat/advanced-mcp
 ```
 
-2. Create and activate a virtual environment:
+2. Fill in your keys:
+```bash
+cp .env
+```
 
+3. Install dependencies and run:
 ```bash
 uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-3. Install dependencies:
-
-```bash
 uv pip install -e .
-```
-
-4. Run the project
-
-```bash
 uv run main.py
 ```
 
-#### Option 2: Setup without uv
+> See the [intro project README](https://github.com/sirinebenyedder/anthropic-mcp-gemini-version/tree/feat/mcp-integration) for full setup details.
 
-1. Create and activate a virtual environment:
+---
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
+## Course Plan
 
-2. Install dependencies:
+### 1. Sampling
 
-```bash
-pip install anthropic python-dotenv prompt-toolkit "mcp[cli]==1.8.0"
-```
+#### 1.1 Definition
 
-3. Run the project
-
-```bash
-python main.py
-```
-
-## Usage
-
-### Basic Interaction
-
-Simply type your message and press Enter to chat with the model.
-
-### Document Retrieval
-
-Use the @ symbol followed by a document ID to include document content in your query:
+Sampling is an MCP feature that allows the **server to delegate LLM calls back to the client**. Instead of the server running its own AI model, the server sends a request to the client saying *"please process this text with your LLM"* — and the client responds using its own already-configured model.
 
 ```
-> Tell me about @deposition.md
+Without Sampling:
+Server tools → return raw data → client LLM processes it
+
+With Sampling:
+Server tools → ask client "summarize this for me"
+             → client's Gemini processes it
+             → result returned to server → back to user
 ```
 
-### Commands
+#### 1.2 CLI Example
 
-Use the / prefix to execute commands defined in the MCP server:
+The `summarize_with_sampling` tool was added to `mcp_server.py`. 
 
-```
-> /summarize deposition.md
-```
+---
 
-Commands will auto-complete when you press Tab.
+### 2. Log and Progress Notifications
 
-## Development
+> 🚧 Coming soon
 
-### Adding New Documents
+---
 
-Edit the `mcp_server.py` file to add new documents to the `docs` dictionary.
+### 3. Roots
 
-### Implementing MCP Features
+> 🚧 Coming soon
 
-To fully implement the MCP features:
+---
 
-1. Complete the TODOs in `mcp_server.py`
-2. Implement the missing functionality in `mcp_client.py`
+### 4. Transports and Communication
 
-### Linting and Typing Check
-
-There are no lint or type checks implemented.
+> 🚧 Coming soon
