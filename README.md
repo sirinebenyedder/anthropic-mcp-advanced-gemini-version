@@ -71,21 +71,32 @@ The condenser tower project began in January 2023 with an initial budget of $2.4
     Upon completion, the tower is expected to return to 98% operational efficiency.
 ```
 #### 2. Output
+<img width="684" height="99" alt="Summarizing" src="https://github.com/user-attachments/assets/7cb4f4ac-9e4b-44e8-8ca4-93bb23cfb726" />
 
 ---
 
 ### 2. Log and Progress Notifications
 
-> 🚧 Coming soon
+#### 2.1 Definition
+Log and Progress Notifications allow the server to send real-time updates to the client while a tool is executing. 
+### 2.2 CLI Example
+<img width="699" height="140" alt="summarizing-Log-Notif" src="https://github.com/user-attachments/assets/2cda58c3-5855-4d85-8036-437c2e643299" />
+<img width="690" height="182" alt="summarizing-Log-Notif2" src="https://github.com/user-attachments/assets/13ae2fd8-7c99-4281-a8b4-3a06e825c405" />
 
 ---
 
 ### 3. Roots
+#### 3.1 Definition
+Roots are a way to grant MCP servers access to specific files and folders 
+on your local machine.
 
-> 🚧 Coming soon
+### 3.2 CLI Example: Feminine to Masculine Conversion
+#### 1. Input (`Alena.txt`)
+```text
+Alena woke up early in the morning as the soft light of the sun entered her room. She stretched slowly, then got out of bed and carefully made it, smoothing the sheets and arranging the pillows neatly. After that, she walked to her wardrobe and chose a comfortable robe to wear.
 
----
+She headed to the kitchen, where the quiet morning gave her a sense of calm. She prepared a cup of tea and stood by the window for a moment, looking outside and enjoying the fresh air. After finishing her tea, Alena returned to her room to get ready for the day ahead, feeling organized and relaxed after her peaceful morning routine.
+```
+#### 2. Output
+<img width="682" height="137" alt="RootExemple2" src="https://github.com/user-attachments/assets/03af330d-ac5e-4327-85dd-eb85e83105ca" />
 
-### 4. Transports and Communication
-
-> 🚧 Coming soon
