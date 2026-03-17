@@ -51,7 +51,9 @@ async def main():
         doc_client = await stack.enter_async_context(
             MCPClient(command=command, args=args , 
                       #the MCPClient needs the llm service for sampling 
-                       llm_service=claude_service)
+                       llm_service=claude_service,
+                       #the roots
+                       roots=[r"C:/Users/HP/Desktop",r"C:/Users/HP/Downloads"] )
         )
         clients["doc_client"] = doc_client
 

@@ -7,14 +7,16 @@ from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 import json
 from pydantic import AnyUrl
-#sampling imports
+#sampling & roots imports 
 from mcp.types import (
     CreateMessageRequestParams,
     CreateMessageResult,
-    TextContent
+    TextContent,
+    Root, ListRootsResult
 )
 from mcp.shared.context import RequestContext
-
+from pydantic import FileUrl
+from pathlib import Path
 class MCPClient:
     def __init__(
         self,
@@ -22,6 +24,7 @@ class MCPClient:
         args: list[str],
         env: Optional[dict] = None,
         llm_service: Any = None,
+        roots: Optional[list[str]] = None,
     ):
         self._command = command
         self._args = args
@@ -29,6 +32,20 @@ class MCPClient:
         self._llm_service = llm_service  #accepting the llm service as a parameter for sampling
         self._session: Optional[ClientSession] = None
         self._exit_stack: AsyncExitStack = AsyncExitStack()
+        self._roots = self._create_roots(roots) if roots else []
+
+    def _create_roots(self, root_paths: list[str]) -> list[Root]:
+        """Convert path strings to Root objects."""
+        roots = []
+        for path in root_paths:
+            p = Path(path).resolve()
+            file_url = FileUrl(f"file://{p}")
+            roots.append(Root(uri=file_url, name=p.name or "Root"))
+        return roots
+
+    async def _handle_list_roots(self, context) -> ListRootsResult:
+        """Callback when server requests roots."""
+        return ListRootsResult(roots=self._roots)
 
     async def connect(self):
         server_params = StdioServerParameters(
@@ -43,7 +60,9 @@ class MCPClient:
         self._session = await self._exit_stack.enter_async_context(
             ClientSession(_stdio, _write,
                           #passing the callback when initializing the client session
-                          sampling_callback=self._sampling_callback )
+                          logging_callback=self._logging_callback,
+                          sampling_callback=self._sampling_callback,
+                          list_roots_callback=self._handle_list_roots if self._roots else None, )
         )
         await self._session.initialize()
 
@@ -101,7 +120,7 @@ class MCPClient:
 
     #Sampling method
     async def _sampling_callback(
-        self,  # ← was missing
+        self,  
         context: RequestContext,
         params: CreateMessageRequestParams
     ) -> CreateMessageResult:
@@ -115,7 +134,7 @@ class MCPClient:
         messages=messages,
         system=params.systemPrompt 
         )
-        print(f"sampling response: {self._llm_service.text_from_message(result)}")
+        #print(f"sampling response: {self._llm_service.text_from_message(result)}")
         return CreateMessageResult(
             role="assistant",
             model=self._llm_service.model,
@@ -131,6 +150,9 @@ class MCPClient:
             print(f"⏳ {progress}/{total} ({(progress/total)*100:.1f}%)")
         else:
             print(f"⏳ {progress}")
+    async def _logging_callback(self, params):
+        print(f"📋 LOG: {params.data}")
+
 
 # For testing
 async def main():

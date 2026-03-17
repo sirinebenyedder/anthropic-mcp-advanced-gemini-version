@@ -26,6 +26,12 @@ docs = {
 }
 #sampling imports
 from mcp.types import SamplingMessage, TextContent
+#Roots imports
+from pathlib import Path
+from urllib.parse import urlparse
+from core.utils import file_url_to_path
+
+
 # TODO: Write a tool to read a doc
 @mcp.tool(
     name="read_doc_contents",
@@ -177,5 +183,91 @@ async def summarize_with_sampling(
         return result.content.text
     else:
         raise ValueError("Sampling failed")
+    
+#Roots and directory reading tools
+async def is_path_allowed(requested_path: Path, ctx: Context) -> bool:
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+
+    if not requested_path.exists():
+        return False
+
+    if requested_path.is_file():
+        requested_path = requested_path.parent
+
+    for root in client_roots:
+        root_path = file_url_to_path(root.uri)
+        try:
+            requested_path.relative_to(root_path)
+            return True
+        except ValueError:
+            continue
+
+    return False
+
+#This is a tool that reads only directories that are within the client's granted roots.
+#Then it use the sampling method to summarize the directory contents.
+#This is an example of how to use both the sampling and roots features together.
+@mcp.tool(
+    name="feminize_to_masculine",
+    description="Convert feminine words to masculine using AI. File must be within granted roots."
+)
+async def feminize_to_masculine(
+    path: str = Field(description="Path to the text file to convert"),
+    ctx: Context = None
+):
+    requested_path = Path(path).resolve()
+    
+    # Roots security check
+    if not await is_path_allowed(requested_path, ctx):
+        raise ValueError(f"❌ Access denied: {path} is not within granted roots!")
+    
+    text = requested_path.read_text()
+    
+    # Sampling — delegate to client's LLM
+    result = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role="user",
+                content=TextContent(
+                    type="text",
+                    text=f"Convert all feminine words to masculine in this text:\n{text}"
+                )
+            )
+        ],
+        max_tokens=4000,
+        system_prompt="You are a text transformation assistant. Only return the transformed text, nothing else.",
+    )
+    
+    if result.content.type == "text":
+        return result.content.text
+    raise ValueError("Sampling failed")
+
+@mcp.tool()
+async def list_roots(ctx: Context):
+    """
+    List all directories that are accessible to this server.
+    These are the root directories where files can be read from or written to.
+    """
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+
+    return [file_url_to_path(root.uri) for root in client_roots]
+
+
+@mcp.tool()
+async def read_dir(
+    path: str = Field(description="Path to a directory to read"),
+    *,
+    ctx: Context,
+):
+    """Read directory contents. Path must be within one of the client's roots."""
+    requested_path = Path(path).resolve()
+
+    if not await is_path_allowed(requested_path, ctx):
+        raise ValueError("Error: can only read directories within a root")
+
+    return [entry.name for entry in requested_path.iterdir()]
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
